@@ -27,11 +27,11 @@ process.
 Accounts and sessions are implemented (M1): email/password registration,
 confirmation and reset mail, JWT access tokens, rotated refresh cookies, logout,
 `/auth/me`, Flyway auth migrations, Mailpit in Compose and integration tests
-against Testcontainers. The client has Tailwind v4, Vue Router, Pinia, the app
-shell, the HTTP client and the complete auth flow. Ranking, ballots and
-snapshots are still specification-only (M2/M3). See [roadmap.md](roadmap.md) for
-the current gap list; do not assume a capability exists because a dependency is
-present.
+against Testcontainers. Characters, ballot writes and the live rank are
+implemented (M2), including the sample catalog, search, detail, ranking math and
+the vote editor. Monthly and annual snapshots are still specification-only (M3).
+See [roadmap.md](roadmap.md) for the current gap list; do not assume a capability
+exists because a dependency is present.
 
 Verify framework APIs against the versions actually resolved by the build
 (`./mvnw dependency:tree`, the local JDK's docs, the installed `node_modules`)
@@ -102,7 +102,7 @@ behaviour behind them is where the complexity lives.
 | `auth.PasswordResetService` | `void request(String email)`, `void reset(String token, String password)` | Token lifecycle, session revocation, enumeration safety | Postgres + mail |
 | `auth.JwtService` | `IssuedAccessToken issue(User)` | JWT claims, signing, TTL | HS256 |
 | `mail.EmailSender` | `void send(EmailMessage)` | SMTP details, templates, dev/test delivery | SMTP, recording |
-| `character.CharacterDirectory` | `Page<CharacterSummary> search(...)`, `CharacterDetail detail(String slug)`, `List<HistoryPoint> history(...)` | Search SQL, accent handling, history join, current rank | Postgres |
+| `character.CharacterDirectory` | `PageResponse<CharacterSummary> search(...)`, `CharacterDetail detail(String slug)` (history in M3) | Search SQL, accent handling, current rank | Postgres |
 | `common.SnapshotPeriods` | `Instant cutoff(YearMonth)`, `YearMonth currentPeriod(Instant)`, `Instant nextCutoff(Instant)` | Zone (`America/Sao_Paulo`), month-end math | `Clock` |
 
 Rules:
@@ -304,13 +304,11 @@ client/src/
 ├── pages/                  # one component per route
 ├── components/             # shared UI (Panel, Button, RankRow, Chart, …)
 ├── stores/auth.ts          # user + access token (memory) + boot state
-├── stores/ballot.ts        # draft ballot, dirty flag, survives navigation
 ├── lib/http.ts             # typed fetch client, refresh, problem+json errors
 ├── lib/types.ts            # hand-written API types mirrored from docs/api.md
 ├── lib/errors.ts           # API error code → pt-BR copy
 ├── lib/format.ts           # Intl pt-BR, rank labels, dates
-├── lib/periods.ts          # period labels + countdown from nextCutoffAt
-└── composables/            # useBallotDraft, useAsync, useSession, …
+└── lib/periods.ts          # countdown from nextCutoffAt
 ```
 
 Installed client dependencies: Vue Router 5, Pinia 4, Tailwind v4 with
@@ -331,12 +329,13 @@ axios:
   restores the route after login; `requiresConfirmed` sends unconfirmed users to
   `/conta` with a confirmation banner. Guards wait for `restoring` to finish so
   reloads do not flash the login page.
-- **Data fetching** — pages use a small `useAsync` composable returning
-  `{data, error, loading, reload}`, with an `AbortController` canceled on
-  unmount. There is no global server cache in the MVP; navigating reloads.
-- **Ballot draft** — `useBallotDraft` exposes add/remove/reorder/validation/save
-  state from the `ballot` store, so the draft survives a login round-trip or a
-  failed save. It is unit-tested without mounting the whole page.
+- **Data fetching** — pages fetch through `lib/http` with local `ref`s for
+  loading, data and error, and render retry and empty states. There is no global
+  server cache in the MVP; navigating reloads. Extract a shared composable only
+  when a third page needs the same state machine.
+- **Ballot editor** — `VotePage` owns the ordered draft, validation hints and a
+  dirty flag, with `beforeunload` and route-leave guards. Moving that state into
+  a `stores/ballot.ts` so it also survives a login round-trip is M4 work.
 - **Styling** — Tailwind v4 with tokens declared in `@theme` in `style.css`
   (see [ui.md](ui.md)); no ad-hoc hex values in components. Components use
   tokens and utility classes only.
@@ -436,7 +435,7 @@ passwords.
 | Pure unit | JUnit 5, AssertJ | Period math, ranking comparator edge cases, token TTLs, draft logic |
 | Web slice | `@WebMvcTest`, security test support | Contract shapes, statuses, error codes, authorization matrix |
 | Integration | `@SpringBootTest` + Testcontainers Postgres | Migrations, repositories, ballot atomicity, generator idempotency, cutoff filtering |
-| Client unit | Vitest + jsdom | HTTP retry, auth-store refresh single-flight, error mapping and formatting; `useBallotDraft` tests arrive with M2 |
+| Client unit | Vitest + jsdom | HTTP retry, auth-store refresh single-flight, error mapping, formatting and countdowns |
 
 Conventions:
 
@@ -445,9 +444,10 @@ Conventions:
   `updated_at` boundary.
 - Mail tests use the recording `EmailSender` and assert the link and token
   purpose; no SMTP in tests.
-- Integration tests run Flyway against Postgres and truncate tables between
-  cases. No H2, ever. Disable the scheduler and the startup backfill in the test
-  profile so a test run cannot generate snapshots behind a test's back.
+- Integration tests run Flyway against Postgres and use transactional rollback
+  between cases, so the seeded characters stay available. No H2, ever. Disable
+  the scheduler and the startup backfill in the test profile so a test run cannot
+  generate snapshots behind a test's back.
 - Snapshot tests cover: empty month, first snapshot (`previous_rank` null),
   ranking change between periods, repeat run (`created=false`), and a ballot
   edited after the cutoff.
