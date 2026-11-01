@@ -63,3 +63,5 @@ app:
       refresh-cookie-secure: ${APP_REFRESH_COOKIE_SECURE:false}
   mail:
     from: ${APP_MAIL_FROM:Turma da Mônica Rank <no-reply@localhost>}
+  rank:
+    zone: ${APP_RANK_ZONE:America/Sao_Paulo}
