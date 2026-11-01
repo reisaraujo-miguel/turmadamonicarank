@@ -1,5 +1,8 @@
-# Vue 3 + TypeScript + Vite
+# Client
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+Vue 3 + TypeScript + Vite single-page app for Turma da Mônica Rank.
 
-Learn more about the recommended Project Setup and IDE Support in the [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup).
+The project quickstart, architecture and conventions live in the root
+[README](../README.md) and [AGENTS.md](../AGENTS.md). Use Bun (`bun install`,
+`bun run dev`, `bun run build`), not npm. Lint and format with `bun run lint`,
+`bun run fmt` and `bun run fmt:check`.
