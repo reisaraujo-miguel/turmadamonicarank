@@ -63,8 +63,11 @@ Client checks:
 cd client
 bun run lint
 bun run fmt:check
+bun run test
 bun run build
 ```
+
+CI runs the API verification and the same client checks on every pull request.
 
 ## Documentation
 

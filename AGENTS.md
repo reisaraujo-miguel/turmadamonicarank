@@ -30,6 +30,7 @@ code follows them.
 AGENTS.md            this file
 README.md            human quickstart
 docs/                specifications; update them in the same change as code
+.github/workflows/   CI checks for API and client
 api/                 Spring Boot 4.1.2 / Java 25 / Maven Wrapper
   src/main/java/rocks/leug/turmadamonicarank/   feature packages
   src/main/resources/db/migration/              Flyway migrations
@@ -57,6 +58,7 @@ Prerequisites: JDK 25, Docker (Postgres, Mailpit and tests), Bun 1.4. Use
 | One API test class | `cd api && ./mvnw test -Dtest=BallotServiceTest` |
 | Run the SPA | `cd client && bun install && bun run dev` → http://localhost:5173 |
 | Build/type-check the SPA | `cd client && bun run build` |
+| Client tests | `cd client && bun run test` |
 | Lint / format check the SPA | `cd client && bun run lint && bun run fmt:check` |
 | Format the SPA | `cd client && bun run fmt` |
 | Mailpit inbox | http://localhost:8025 |
@@ -120,8 +122,9 @@ and there must not be one.
    exist, keyboard works, and 360 px is usable.
 7. Update the docs that describe the behaviour. Done when the endpoint, table,
    route or rule appears in exactly one authoritative place.
-8. Run `cd api && ./mvnw verify` and `cd client && bun run build`. Both must
-   pass; fix failures instead of skipping checks.
+8. Run `cd api && ./mvnw verify`, `cd client && bun run test` and
+   `cd client && bun run build`. All must pass; fix failures instead of skipping
+   checks.
 9. Tick the roadmap task. Commit in Conventional Commits style, scoped, with the
    requirement ID: `feat(ballot): replace ballot atomically (FR-VOTE-04)`.
 
@@ -151,7 +154,7 @@ and there must not be one.
 - [ ] Keyboard-only path works; focus visible; chart has a table alternative.
 - [ ] Only design tokens are used; no raw hex values or soft shadows.
 - [ ] No rank, point or cutoff computation in the client.
-- [ ] `bun run build` passes (it type-checks).
+- [ ] `bun run test` and `bun run build` pass.
 
 **Data**
 
@@ -169,6 +172,9 @@ and there must not be one.
 - Conventional Commits, small focused commits, one vertical slice at a time.
 - Tests are named for behaviour, not implementation (`rejectsDuplicateCharacter`),
   and use the fixed test clock rather than sleeps.
+- `.editorconfig` owns indentation and line endings. GitHub Actions
+  (`.github/workflows/ci.yml`) runs the API and client checks on every pull
+  request.
 
 ## Gotchas
 

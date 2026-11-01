@@ -314,9 +314,9 @@ client/src/
 ```
 
 Installed client dependencies: Vue Router 5, Pinia 4, Tailwind v4 with
-`@tailwindcss/vite`, and self-hosted Baloo 2 / Nunito Sans font subsets. Tests
-will add `vitest`, `@vue/test-utils` and `jsdom` when client test coverage
-lands. No UI kit, no chart library, no axios:
+`@tailwindcss/vite`, self-hosted Baloo 2 / Nunito Sans font subsets, and Vitest
+with Vue Test Utils and jsdom for unit tests. No UI kit, no chart library, no
+axios:
 
 - **HTTP client** — `lib/http.ts` is a deep module: callers get typed
   `get/put/post/delete` that attach the bearer token, add a request timeout,
@@ -379,7 +379,7 @@ by environment variables. Secrets never enter the repository.
 | `app.security.auth.reset-ttl` | — | `1h` |
 | `app.security.auth.refresh-cookie-secure` | `APP_REFRESH_COOKIE_SECURE` | `false` locally, `true` in production |
 | `app.mail.from` | `APP_MAIL_FROM` | `Turma da Mônica Rank <no-reply@localhost>` |
-| `app.rank.zone` (M3) | — | `America/Sao_Paulo` |
+| `app.rank.zone` | `APP_RANK_ZONE` | `America/Sao_Paulo` |
 | `app.rank.snapshot-cron` (M3) | — | `0 5 0 1 * *` |
 | `spring.datasource.url` | `SPRING_DATASOURCE_URL` | from Compose |
 | `spring.datasource.username` | `SPRING_DATASOURCE_USERNAME` | `myuser` |
@@ -436,7 +436,7 @@ passwords.
 | Pure unit | JUnit 5, AssertJ | Period math, ranking comparator edge cases, token TTLs, draft logic |
 | Web slice | `@WebMvcTest`, security test support | Contract shapes, statuses, error codes, authorization matrix |
 | Integration | `@SpringBootTest` + Testcontainers Postgres | Migrations, repositories, ballot atomicity, generator idempotency, cutoff filtering |
-| Client unit | Vitest + Vue Test Utils | `lib/http` refresh single-flight, errors, `useBallotDraft`, formatting |
+| Client unit | Vitest + jsdom | HTTP retry, auth-store refresh single-flight, error mapping and formatting; `useBallotDraft` tests arrive with M2 |
 
 Conventions:
 
@@ -451,8 +451,9 @@ Conventions:
 - Snapshot tests cover: empty month, first snapshot (`previous_rank` null),
   ranking change between periods, repeat run (`created=false`), and a ballot
   edited after the cutoff.
-- `./mvnw verify` must pass before a change is considered done; `bun run build`
-  for client changes.
+- `./mvnw verify` must pass before a change is considered done; `bun run test`
+  and `bun run build` cover client changes. GitHub Actions runs the same checks
+  for every pull request (`.github/workflows/ci.yml`).
 
 ## Performance and scaling notes
 

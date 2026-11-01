@@ -11,10 +11,10 @@ more interesting. Update this file when a task lands or the order changes.
 | Area | Exists | Missing (before it is usable) |
 | --- | --- | --- |
 | Docs | This `docs/` suite, `AGENTS.md`, `README.md` | — |
-| API | Spring Boot 4.1.2 on Java 25; Flyway auth schema; JWT/refresh session service; registration, confirmation, reset; Mailpit; problem+json; integration tests | Ranking, ballots, character catalog, snapshots, annual snapshots, rate limiting, SPA packaging, CI |
-| Client | Vue 3.5 + Vite 8 + TS 6 + Tailwind v4 + Router 5 + Pinia 4; shell; HTTP/refresh client; full auth flow; formatter and linter | Rank/character/vote pages, ballot editor, history chart, client tests, production build integration |
+| API | Spring Boot 4.1.2 on Java 25; Flyway auth schema; JWT/refresh session service; registration, confirmation, reset; Mailpit; problem+json; integration tests; period helpers | Ranking, ballots, character catalog, snapshots, annual snapshots, rate limiting, SPA packaging |
+| Client | Vue 3.5 + Vite 8 + TS 6 + Tailwind v4 + Router 5 + Pinia 4; shell; HTTP/refresh client; full auth flow; Vitest coverage; formatter, linter, CI | Rank/character/vote pages, ballot editor, history chart, production build integration |
 | Data | `users`, `auth_tokens`, `refresh_tokens` | Characters, ballots, monthly and annual snapshots, seed catalog |
-| Delivery | Local dev, Docker Compose with Postgres and Mailpit | CI, production config, deploy, account deletion/export |
+| Delivery | Local dev, Docker Compose, GitHub Actions CI | Production config, deploy, account deletion/export |
 
 The sample `/hello` endpoint is gone and the main class is thin.
 
@@ -31,24 +31,25 @@ Goal: a clean, buildable base that every later milestone can lean on.
       [ui.md](ui.md#routes-and-guards), and `lang="pt-BR"` + title in
       `index.html`.
 - [x] Client: `lib/http.ts`, `lib/errors.ts`, `lib/format.ts` and `stores/auth.ts`.
-- [ ] Client: add `vitest`, `@vue/test-utils` and `jsdom`, with tests for error
-      mapping, refresh single-flight and formatting.
+- [x] Client: add `vitest`, `@vue/test-utils` and `jsdom`; tests cover error
+      mapping, formatting, HTTP retry and refresh single-flight.
 - [x] API: delete the sample endpoint; add `application-local.yaml`; add
       Mailpit to `api/compose.yaml`; pin the Postgres image (in Compose and
       `TestcontainersConfiguration`) and map `5432:5432`; configure
       `ddl-auto: validate`, `open-in-view: false`, UTC.
 - [x] API: `Clock` bean.
-- [ ] API: `SnapshotPeriods` with unit tests (cutoff, current period, next cutoff
-      across month/year boundaries). Moved to M3.
+- [x] API: `SnapshotPeriods` with unit tests for cutoffs, current period, next
+      cutoff and year boundaries in `America/Sao_Paulo`.
 - [x] API: problem+json advice and the `ApiErrorCode` enum.
-- [ ] Add `.editorconfig`; the client already has `oxfmt` and `oxlint`
+- [x] Add `.editorconfig`; the client uses `oxfmt` and `oxlint`
       (`bun run fmt`, `bun run fmt:check`, `bun run lint`).
-- [ ] CI skeleton: API `./mvnw -B verify` (JDK 25 + Docker) and client
-      `bun install --frozen-lockfile && bun run build`, with path filters.
+- [x] CI: GitHub Actions runs API `./mvnw -B verify` (JDK 25 + Docker) and the
+      client lint, format, test and build checks.
 
-**Exit criteria:** `bun run build` and `./mvnw test` pass from a clean clone;
-the shell renders every route; the API serves only the auth routes,
-`/actuator/health` and problem+json 404s. CI remains open and moves to M5.
+**Exit criteria:** `bun run build`, `bun run test` and `./mvnw verify` pass from
+a clean clone; the shell renders every route; the API serves only the auth
+routes, `/actuator/health` and problem+json 404s; CI is green. Done
+(2026-11-01).
 
 ## Milestone M1 — Accounts and sessions
 
@@ -204,7 +205,6 @@ walkthrough, docs update.
 
 ## Known gaps to keep visible
 
-- There is no CI and no `.editorconfig` yet.
 - Ranking, ballots, character data, monthly snapshots and annual snapshots are
   not implemented.
 - The client still has placeholder ranking, character and vote pages.
