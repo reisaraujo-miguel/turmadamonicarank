@@ -493,10 +493,10 @@ ON CONFLICT (slug) DO UPDATE
 SET name = EXCLUDED.name, bio = EXCLUDED.bio, …;
 ```
 
-It then upserts aliases by `(character_id, lower(alias))` and deletes aliases
-that no longer appear in the seed. Because it is repeatable, editing the seed
-reruns it on next startup; character rows are seed-owned until an admin path
-exists.
+It then upserts aliases by `(character_id, lower(alias))`. Aliases removed from
+the seed are not deleted automatically; prune them intentionally in a later seed
+change. Because it is repeatable, editing the seed reruns it on next startup;
+character rows are seed-owned until an admin path exists.
 
 Seed rules:
 

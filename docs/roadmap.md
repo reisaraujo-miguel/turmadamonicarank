@@ -11,9 +11,9 @@ more interesting. Update this file when a task lands or the order changes.
 | Area | Exists | Missing (before it is usable) |
 | --- | --- | --- |
 | Docs | This `docs/` suite, `AGENTS.md`, `README.md` | — |
-| API | Spring Boot 4.1.2 on Java 25; Flyway auth schema; JWT/refresh session service; registration, confirmation, reset; Mailpit; problem+json; integration tests; period helpers | Ranking, ballots, character catalog, snapshots, annual snapshots, rate limiting, SPA packaging |
-| Client | Vue 3.5 + Vite 8 + TS 6 + Tailwind v4 + Router 5 + Pinia 4; shell; HTTP/refresh client; full auth flow; Vitest coverage; formatter, linter, CI | Rank/character/vote pages, ballot editor, history chart, production build integration |
-| Data | `users`, `auth_tokens`, `refresh_tokens` | Characters, ballots, monthly and annual snapshots, seed catalog |
+| API | Spring Boot 4.1.2 on Java 25; Flyway auth/character/ballot schema; JWT sessions; characters and search; ballot replacement; live rank; sample seed; Mailpit; tests | Snapshot generation, annual snapshots, rate limiting, SPA packaging |
+| Client | Vue 3.5 + Vite 8 + TS 6 + Tailwind v4 + Router 5 + Pinia 4; live rank, character directory/detail, ballot editor, auth; Vitest coverage; CI | Snapshot/year pages, history chart, movement badges, production build integration |
+| Data | `users`, `auth_tokens`, `refresh_tokens`, `characters`, `character_aliases`, `ballots`, `ballot_entries` | Monthly and annual snapshots, full character catalog |
 | Delivery | Local dev, Docker Compose, GitHub Actions CI | Production config, deploy, account deletion/export |
 
 The sample `/hello` endpoint is gone and the main class is thin.
@@ -82,22 +82,23 @@ browser storage. Done (2026-11-01); rate limiting stays in M5.
 
 Goal: the core loop works end to end.
 
-- [ ] `V3__characters.sql` + `R__seed_characters.sql` with the five sample
-      characters and generated placeholders for images.
-- [ ] `character` module: search (accent- and typo-tolerant), detail, aliases.
-- [ ] `V4__ballots.sql`, `ballot` module: read, atomic replace, withdraw,
+- [x] `V3__characters.sql` + `R__seed_characters.sql` with the five sample
+      characters and initials placeholders for images.
+- [x] `character` module: search (accent- and typo-tolerant), detail, aliases.
+- [x] `V4__ballots.sql`, `ballot` module: read, atomic replace, withdraw,
       confirmation gate, inactive-character rejection.
-- [ ] `rank` module: `RankCalculator` shared SQL, live endpoint with pagination,
+- [x] `rank` module: `RankCalculator` shared SQL, live endpoint with pagination,
       cache header, `nextCutoffAt` and latest-snapshot summary.
-- [ ] Tests: ballot validation, atomicity, points ordering, tie-breaks,
+- [x] Tests: ballot validation, atomicity, points ordering, tie-breaks,
       inactive filtering, rank contract, search accents.
-- [ ] Client: character list/detail placeholders, search combobox, ballot
-      editor with keyboard reorder and dirty-state guard, live rank page.
-      History chart lands with M3 because there is no history yet.
+- [x] Client: character list and detail, search, ballot editor with keyboard
+      reorder, live home podium and ranking page. History chart lands with M3
+      because there is no history yet.
 
 **Exit criteria:** a confirmed user can search a character, build and save a
 top-10, edit it, withdraw it, and see the live ranking change accordingly;
-unconfirmed users cannot write; search finds "monica" for "Mônica".
+unconfirmed users cannot write; search finds "monica" for "Mônica". Done
+(2026-11-01).
 
 ## Milestone M3 — Monthly count and snapshots
 
@@ -205,9 +206,11 @@ walkthrough, docs update.
 
 ## Known gaps to keep visible
 
-- Ranking, ballots, character data, monthly snapshots and annual snapshots are
-  not implemented.
-- The client still has placeholder ranking, character and vote pages.
+- Monthly snapshots, annual snapshots and the position history are not
+  implemented.
+- The full character catalog and image rights are unresolved; the five seed
+  characters use initials placeholders.
+- The client still has placeholder month/year snapshot views.
 - Account deletion and export are launch requirements but not built.
 - Rate limiting and production deployment are not built.
 - Character content and image rights are unresolved; images stay placeholders

@@ -229,8 +229,9 @@ The functional heart; keep it quiet and confident.
 - Position labels are pt-BR ordinals ("1º", "2º", …).
 - Sticky action bar on mobile with the count and the save button; the discard
   action is secondary and confirms.
-- Unsaved changes: `beforeunload` prompt and an in-app confirm dialog on route
-  change. The draft lives in `stores/ballot.ts` so an auth round-trip keeps it.
+- Unsaved changes: `beforeunload` prompt and an in-app confirm on route change.
+  M2 keeps the draft in the vote page; moving it to `stores/ballot.ts` so an auth
+  round-trip keeps it is M4 work.
 - Success: a stamped "Voto salvo" panel with the last-saved time and the next
   count date. Keep it calm: one stamp, no confetti or celebratory clutter.
 - Unconfirmed users are redirected to `/conta` with the confirmation banner. If
@@ -335,8 +336,9 @@ Behaviour rules:
 - Toasts are polite (`aria-live="polite"`) and disappear after 6 s; errors stay
   until dismissed or retried.
 - Destructive actions (withdraw ballot, discard changes) require confirmation.
-- No component fetches directly in `setup()`; pages call composables, components
-  receive props and emit intentions.
+- Pages own their fetch state in `onMounted`; components receive props and emit
+  intentions. Extract a shared composable when a third page needs the same state
+  machine.
 
 ## Copy rules
 
@@ -428,12 +430,12 @@ Checklist for every page:
 
 ## Implementation status
 
-M1 shipped the design tokens, Baloo/Nunito typography, the app shell, the auth
-pages, account page, home/placeholder pages, about and 404, router guards and the
-HTTP/auth stores. Still target-only: the rank/character/vote content, history
-chart, ballot editor, mobile nav disclosure, client test suite and the full
-loading/empty/error matrix for data pages. Keep this spec as the destination; see
-[roadmap.md](roadmap.md) for the sequence.
+M2 shipped the live home podium and shortlist, the full ranking page, the
+character directory and detail page, the ballot editor, the avatar placeholder
+and the countdown helper. Still target-only: monthly/yearly snapshot pages, the
+history chart, movement badges, the mobile nav disclosure, the remaining client
+test suite and the polished empty/error matrix for every data view. Keep this
+spec as the destination; see [roadmap.md](roadmap.md) for the sequence.
 
 ## Legal and content guardrails
 

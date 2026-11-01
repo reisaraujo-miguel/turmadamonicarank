@@ -47,7 +47,7 @@ const router = createRouter({
     {
       path: "/personagens/:slug",
       name: "character",
-      component: () => import("../pages/CharactersPage.vue"),
+      component: () => import("../pages/CharacterDetailPage.vue"),
       props: true,
       meta: { title: "Personagem" },
     },

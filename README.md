@@ -10,10 +10,10 @@ The interface is in Brazilian Portuguese. Code, docs and commits are in English.
 
 ## Status
 
-The account loop is implemented and working against a local Postgres and
-Mailpit: register, confirm e-mail, log in, refresh, reset password and log out.
-The ranking, ballots and snapshots are still specified but not built; the next
-slice is tracked in [the roadmap](docs/roadmap.md). Nothing is deployed yet.
+The account loop, the five-character sample catalog, the ballot editor and the
+live ranking are implemented against a local Postgres and Mailpit. Monthly and
+annual snapshots, the position history chart and the full character catalog are
+next, tracked in [the roadmap](docs/roadmap.md). Nothing is deployed yet.
 
 ## Stack
 

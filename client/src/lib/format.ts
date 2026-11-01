@@ -18,3 +18,7 @@ export function formatDay(value: string | null | undefined): string {
     timeZone: "America/Sao_Paulo",
   }).format(new Date(value));
 }
+
+export function formatNumber(value: number): string {
+  return new Intl.NumberFormat("pt-BR").format(value);
+}
