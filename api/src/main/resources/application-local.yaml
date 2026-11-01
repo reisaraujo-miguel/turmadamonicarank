@@ -1,0 +1,8 @@
+logging:
+  level:
+    rocks.leug.turmadamonicarank: DEBUG
+
+app:
+  security:
+    auth:
+      refresh-cookie-secure: false
